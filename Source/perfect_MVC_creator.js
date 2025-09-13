@@ -578,7 +578,32 @@ abstract class AbstractManager
                     console.error(`Error occurred: ${error.message}`);
 }
 
-
+try {
+                    const absMapping = `<?php
+namespace model\\Abstract;
+abstract class AbstractMapping
+{
+    public function __construct(array $tab)
+    {
+        $this->hydrate($tab);
+    }
+    protected function hydrate(array $assoc): void
+    {
+        foreach ($assoc as $key => $value) {
+            $tab = explode("_", $key);
+            $majuscule = array_map('ucfirst',$tab);
+            $newNameCamelCase = implode($majuscule);
+            $methodeName = "set" . $newNameCamelCase;
+            if (method_exists($this, $methodeName)) {
+                $this->$methodeName($value);
+            }
+        }
+    }
+}`
+    fs.writeFileSync(`${projName}/model/Abstract/AbstractMapping.php`, absMapping);
+}catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+}
                 completed(" - All done!");
 
             });
