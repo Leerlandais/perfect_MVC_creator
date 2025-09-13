@@ -1,20 +1,15 @@
 <?php
 
-namespace model\Manager;
-class ConnectionManager extends AbstractManager
-{
-    public function logoutUser() : void
-    {
-        $_SESSION = [];
+const DB_DRIVER = "mysql",
+DB_HOST = "localhost",
+DB_LOGIN = "root",
+DB_PWD = "",
+DB_NAME = "isp_main",
+DB_PORT = 3306,
+DB_CHARSET = "utf8mb4",
+DB_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
 
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
-            );
-        }
-        session_destroy();
-    }
+const PROJECT_DIRECTORY = __DIR__,
+PUB_DIR = '../public/';
 
-}
+const ENV_MODE = "DEV";
