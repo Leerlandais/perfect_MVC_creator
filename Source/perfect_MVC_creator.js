@@ -146,6 +146,22 @@ config.php
                     console.error(`Error occurred: ${error.message}`);
                 }
 
+                try {
+                    const tempTwig = `{% extends 'base.html.twig' %}`;
+                    fs.writeFileSync(`${projName}/view/template.html.twig`, tempTwig);
+
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+                try {
+                    const homeTwig = `{% extends 'template.html.twig' %}   
+{% block hero %}If you can see this, all is good{% endblock %}
+        `;
+                    fs.writeFileSync(`${projName}/view/public/public.index.html.twig`, homeTwig);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
                 completed(" - All done!");
 
             });
