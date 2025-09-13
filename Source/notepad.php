@@ -1,34 +1,20 @@
 <?php
 
-namespace Factory;
-
-use model\MyPDO;
-
-
-class ManagerFactory
+namespace model\Manager;
+class ConnectionManager extends AbstractManager
 {
-    private MyPDO $db;
-    private array $instances = [];
-
-    public function __construct(MyPDO $db)
+    public function logoutUser() : void
     {
-        $this->db = $db;
+        $_SESSION = [];
 
-    }
-
-    public function get(string $managerClass): object
-    {
-        /*
-         * Centralises Managers
-         * Child Controllers call for their necessary Managers via their __construct
-         * AbstractController requests the Manager from here and passes it on
-         * This way only one function is used to instantiate Managers : DRY is the way
-         */
-        if (!isset($this->instances[$managerClass])) {
-            $this->instances[$managerClass] = new $managerClass(
-                $this->db
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
             );
         }
-        return $this->instances[$managerClass];
+        session_destroy();
     }
+
 }

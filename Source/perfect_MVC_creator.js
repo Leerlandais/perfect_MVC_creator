@@ -31,7 +31,6 @@ rl.question("Enter the project name : ", function (projName) {
                     fs.mkdirSync(`${projName}/data`);
                     fs.mkdirSync(`${projName}/model`);
                     fs.mkdirSync(`${projName}/model/Abstract`);
-                    fs.mkdirSync(`${projName}/model/Interface`);
                     fs.mkdirSync(`${projName}/model/Manager`);
                     fs.mkdirSync(`${projName}/model/Mapping`);
                     fs.mkdirSync(`${projName}/model/Trait`);
@@ -69,7 +68,6 @@ rl.question("Enter the project name : ", function (projName) {
                     `${projName}/data`,
                     `${projName}/model`,
                     `${projName}/model/Abstract`,
-                    `${projName}/model/Interface`,
                     `${projName}/model/Manager`,
                     `${projName}/model/Mapping`,
                     `${projName}/model/Trait`,
@@ -182,8 +180,8 @@ const IMG_DIR = '/public/images';
                     console.error(`Error occurred: ${error.message}`);
                 }
 
-try {
-                const index = `<?php
+                try {
+                    const index = `<?php
 session_start();
 if (isset($_SESSION["activity"]) && time() - $_SESSION["activity"] > 1800) {
     session_unset();
@@ -234,12 +232,12 @@ try {
 
 require_once PROJECT_DIRECTORY . '/Controllers/RouteController.php';
 $db = null;`
-}catch (error) {
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try {
-    const pdo = `<?php
+                try {
+                    const pdo = `<?php
 namespace model;
 use PDO;
 use Exception;
@@ -266,12 +264,12 @@ class MyPDO extends PDO
     }
 }
 `
-    fs.writeFileSync(`${projName}/model/MyPDO.php`, pdo);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/model/MyPDO.php`, pdo);
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try {
+                try {
                     const absController = `<?php
 
 namespace Controllers\\Abstract;
@@ -440,13 +438,13 @@ abstract class AbstractController
 }
 `
 
-    fs.writeFileSync(`${projName}/Controllers/Abstract/AbstractController.php`, absController);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/Controllers/Abstract/AbstractController.php`, absController);
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try{
-    const routeController = `<?php
+                try {
+                    const routeController = `<?php
 namespace Controllers;
 use    model\\Manager\\RouteManager;
 
@@ -466,13 +464,13 @@ $router->registerRoute('404', ErrorController::class, 'error404');
 $route = $_GET['route'] ?? 'home';
 $router->handleRequest($route);`
 
-    fs.writeFileSync(`${projName}/Controllers/RouteController.php`, routeController);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/Controllers/RouteController.php`, routeController);
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try{
-               const connFactory = `<?php
+                try {
+                    const connFactory = `<?php
 
 namespace factory;
 
@@ -491,12 +489,12 @@ class ConnectionFactory
     }
 
 }`
-    fs.writeFileSync(`${projName}/factory/ConnectionFactory.php`, connFactory);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/factory/ConnectionFactory.php`, connFactory);
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try{
+                try {
                     const managerFactory = `<?php
 
 namespace Factory;
@@ -531,13 +529,13 @@ class ManagerFactory
         return $this->instances[$managerClass];
     }
 }`
-    fs.writeFileSync(`${projName}/factory/ManagerFactory.php`, managerFactory);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/factory/ManagerFactory.php`, managerFactory);
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try{
-    const absMan = `<?php
+                try {
+                    const absMan = `<?php
 
 namespace model\\Abstract;
 
@@ -573,12 +571,12 @@ abstract class AbstractManager
         return true;
     }
 }`;
-    fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
-}
+                }
 
-try {
+                try {
                     const absMapping = `<?php
 namespace model\\Abstract;
 abstract class AbstractMapping
@@ -600,10 +598,98 @@ abstract class AbstractMapping
         }
     }
 }`
-    fs.writeFileSync(`${projName}/model/Abstract/AbstractMapping.php`, absMapping);
+                    fs.writeFileSync(`${projName}/model/Abstract/AbstractMapping.php`, absMapping);
+                } catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+                try {
+
+                } catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+                try {
+                    const connManager = `<<?php
+
+namespace model\\Manager;
+class ConnectionManager extends AbstractManager
+{
+    public function logoutUser() : void
+    {
+        $_SESSION = [];
+
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+        session_destroy();
+    }
+    
+}`
+                    fs.writeFileSync(`${projName}/model/Manager/ConnectionManager.php`, connManager);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+try {
+                    const routeManager = `<?php
+
+namespace model\\Manager;
+
+use Factory\\ManagerFactory;
+use model\\MyPDO;
+use Twig\\Environment;
+
+class RouteManager
+{
+    private array $routes = [];
+    private Environment $twig;
+
+    private ManagerFactory $factory;
+
+    public function __construct(Environment $twig, MyPDO $mainDb, MyPDO $candDb, MyPDO $testDb)
+    {
+        $this->twig = $twig;
+
+        $this->factory = new ManagerFactory($mainDb, $candDb, $testDb);
+    }
+
+    public function registerRoute(string $routeName, string $controllerClass, string $methodName): void
+    {
+        $this->routes[$routeName] = [
+            'controller' => $controllerClass,
+            'method' => $methodName
+        ];
+    }
+
+    public function handleRequest($route): void
+    {
+        if (!isset($this->routes[$route])) {
+            $route = '404';
+        }
+
+        $controllerClass = $this->routes[$route]['controller'];
+        $method = $this->routes[$route]['method'];
+
+        $controller = new $controllerClass($this->twig, $this->factory);
+
+                $params = $_GET ?? [];
+        if (!empty($params)) {
+            $controller->$method($params);
+        } else {
+            $controller->$method(null);
+        }
+    }
+}`
+    fs.writeFileSync(`${projName}/model/Manager/RouteManager.php`, routeManager);
 }catch (error) {
                     console.error(`Error occurred: ${error.message}`);
 }
+
                 completed(" - All done!");
 
             });
