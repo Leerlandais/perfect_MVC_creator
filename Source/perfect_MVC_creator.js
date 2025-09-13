@@ -91,16 +91,16 @@ rl.question("Enter the project name : ", function (projName) {
                 } catch (error) {
                     console.error(error);
                 }
-try {
-    const gitIgnore = `.idea
+                try {
+                    const gitIgnore = `.idea
 /vendor
 /node_modules
 config.php
 `;
-    fs.writeFileSync(`${projName}/.gitignore`, gitIgnore);
-}catch (error) {
+                    fs.writeFileSync(`${projName}/.gitignore`, gitIgnore);
+                } catch (error) {
                     console.error(error);
-}
+                }
                 try {
 
                     // ...base.twig
@@ -150,7 +150,7 @@ config.php
                     const tempTwig = `{% extends 'base.html.twig' %}`;
                     fs.writeFileSync(`${projName}/view/template.html.twig`, tempTwig);
 
-                }catch (error) {
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
 
@@ -159,9 +159,86 @@ config.php
 {% block hero %}If you can see this, all is good{% endblock %}
         `;
                     fs.writeFileSync(`${projName}/view/public/public.index.html.twig`, homeTwig);
-                }catch (error) {
+                } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
+
+                try {
+                    const cfgFile = `<?php
+const DB_DRIVER = "mysql";
+const DB_HOST = "localhost";
+const DB_LOGIN = "root";
+const DB_PWD = "";
+const DB_NAME = "${dbName}";
+const DB_PORT = ${dbPort};
+const DB_CHARSET = "utf8mb4";
+const PROJECT_DIRECTORY = __DIR__;
+const PUB_DIR = '/public/';
+const IMG_DIR = '/public/images';
+`;
+
+                    fs.writeFileSync(`${projName}/config.php`, cfgFile);
+                } catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+try {
+                const index = `<?php
+session_start();
+if (isset($_SESSION["activity"]) && time() - $_SESSION["activity"] > 1800) {
+    session_unset();
+    session_destroy();
+    header("location: ./");
+    exit();
+}
+$_SESSION["activity"] = time();
+if (isset($_SESSION["systemMessage"])) {
+    $systemMessage = $_SESSION["systemMessage"];
+    unset($_SESSION["systemMessage"]);
+}else {
+    $systemMessage = "";
+}
+$sessionRole = "";
+if(isset($_SESSION['roles'])) $sessionRole = $_SESSION['roles'];
+use Twig\\Loader\\FilesystemLoader;
+use Twig\\Environment;
+use factory\\ConnectionFactory;
+require_once "../config.php";
+spl_autoload_register(function ($class) {
+  $class = str_replace('\\\\', '/', $class);
+  require PROJECT_DIRECTORY.'/' .$class . '.php';
+});
+require_once PROJECT_DIRECTORY.'/vendor/autoload.php';
+$loader = new FilesystemLoader(PROJECT_DIRECTORY.'/view/');
+// Dev version
+$twig = new Environment($loader, [
+  'debug' => true,
+]);
+$twig->addExtension(new \\Twig\\Extension\\DebugExtension());
+
+$twig->addGlobal('PUB_DIR', PUB_DIR);
+$twig->addGlobal('PROJ_DIR', PROJECT_DIRECTORY);
+$twig->addGlobal("ENV", ENV_MODE);
+// // Prod version
+// $twig = new Environment($loader, [
+//    'cache' => '../cache/Twig',
+//    'debug' => false,
+// ]);
+// // no DebugExtension online
+ var_dump($_SESSION);
+try {
+    $db = ConnectionFactory::createDb();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
+
+require_once PROJECT_DIRECTORY . '/Controllers/RouteController.php';
+$db = null;`
+}catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+}
+
+
                 completed(" - All done!");
 
             });
