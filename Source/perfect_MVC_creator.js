@@ -536,6 +536,48 @@ class ManagerFactory
                     console.error(`Error occurred: ${error.message}`);
 }
 
+try{
+    const absMan = `<?php
+
+namespace model\\Abstract;
+
+use model\\MyPDO;
+use Twig\\Environment;
+
+abstract class AbstractManager
+{
+    protected MyPDO $db;
+    protected Environment $twig;
+
+    public function __construct(MyPDO $db, Environment $twig)
+    {
+        $this->db = $db;
+        $this->twig = $twig;
+    }
+        public function insertAnything(array $data): bool
+    {
+        $columns = implode(", ", array_keys($data));
+        $placeholders = ":" . implode(", :", array_keys($data));
+        $stmt = $this->db->prepare("INSERT INTO \`DB_NAME\` ($columns) VALUES ($placeholders)");
+        $stmt->execute($data);
+        if ($stmt->rowCount() === 0) return false;
+        return true;
+
+    }
+        public function updateAnything(int $id, array $data): bool
+    {
+        $dataSet = implode(", ", array_map(fn($key) => "$key = :$key", array_keys($data)));
+        $stmt = $this->db->prepare("UPDATE \`DB_NAME\` SET $dataSet WHERE \`FIELD_ID_NAME\` = :id");
+        $stmt->execute(array_merge($data, ["id" => $id]));
+        if ($stmt->rowCount() === 0) return false;
+        return true;
+    }
+}`;
+    fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
+}catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+}
+
 
                 completed(" - All done!");
 
