@@ -471,6 +471,70 @@ $router->handleRequest($route);`
                     console.error(`Error occurred: ${error.message}`);
 }
 
+try{
+               const connFactory = `<?php
+
+namespace factory;
+
+use model\\MyPDO;
+
+class ConnectionFactory
+{
+    public static function createMainDb(): MyPDO
+    {
+        return MyPDO::getInstance(
+            DB_CONNECTION_STRING,
+            DB_LOGIN,
+            DB_PWD,
+            DB_OPTIONS
+        );
+    }
+
+}`
+    fs.writeFileSync(`${projName}/factory/ConnectionFactory.php`, connFactory);
+}catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+}
+
+try{
+                    const managerFactory = `<?php
+
+namespace Factory;
+
+use model\\MyPDO;
+
+
+class ManagerFactory
+{
+    private MyPDO $db;
+    private array $instances = [];
+
+    public function __construct(MyPDO $db)
+    {
+        $this->db = $db;
+
+    }
+
+    public function get(string $managerClass): object
+    {
+        /*
+         * Centralises Managers
+         * Child Controllers call for their necessary Managers via their __construct
+         * AbstractController requests the Manager from here and passes it on
+         * This way only one function is used to instantiate Managers : DRY is the way
+         */
+        if (!isset($this->instances[$managerClass])) {
+            $this->instances[$managerClass] = new $managerClass(
+                $this->db
+            );
+        }
+        return $this->instances[$managerClass];
+    }
+}`
+    fs.writeFileSync(`${projName}/factory/ManagerFactory.php`, managerFactory);
+}catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+}
 
 
                 completed(" - All done!");

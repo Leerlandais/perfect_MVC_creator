@@ -1,19 +1,34 @@
 <?php
-namespace Controllers;
-use    model\Manager\RouteManager;
+
+namespace Factory;
+
+use model\MyPDO;
 
 
-$router = new RouteManager($twig, $db);
+class ManagerFactory
+{
+    private MyPDO $db;
+    private array $instances = [];
 
-// Register routes
-// GENERAL ROUTES
-$router->registerRoute('home', ConnectionController::class, 'index');
-$router->registerRoute("logout", ConnectionController::class, "logout");
-$router->registerRoute('404', ErrorController::class, 'error404');
+    public function __construct(MyPDO $db)
+    {
+        $this->db = $db;
 
+    }
 
-
-
-// Handle request
-$route = $_GET['route'] ?? 'home';
-$router->handleRequest($route);
+    public function get(string $managerClass): object
+    {
+        /*
+         * Centralises Managers
+         * Child Controllers call for their necessary Managers via their __construct
+         * AbstractController requests the Manager from here and passes it on
+         * This way only one function is used to instantiate Managers : DRY is the way
+         */
+        if (!isset($this->instances[$managerClass])) {
+            $this->instances[$managerClass] = new $managerClass(
+                $this->db
+            );
+        }
+        return $this->instances[$managerClass];
+    }
+}
