@@ -567,7 +567,6 @@ abstract class AbstractManager
         $stmt->execute(array_merge($data, ["id" => $responseId]));
         return $stmt->rowCount() > 0; // rather than if($stmt->rowCount() === 0) return false; return true; This does it in one line
     }
-}
 }`;
                     fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
                 } catch (error) {
