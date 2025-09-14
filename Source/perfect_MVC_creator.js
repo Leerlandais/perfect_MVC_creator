@@ -552,24 +552,22 @@ abstract class AbstractManager
     {
         $this->db = $db;
     }
-        public function insertAnything(array $data): bool
+    protected function insertAnything(array $data, string $dbName, string $dbType = "db"): bool
     {
         $columns = implode(", ", array_keys($data));
         $placeholders = ":" . implode(", :", array_keys($data));
-        $stmt = $this->db->prepare("INSERT INTO \`DB_NAME\` ($columns) VALUES ($placeholders)");
+        $stmt = $this->$dbType->prepare("INSERT INTO $dbName ($columns) VALUES ($placeholders)");
         $stmt->execute($data);
-        if ($stmt->rowCount() === 0) return false;
-        return true;
-
+        return (int)$this->$dbType->lastInsertId() > 0; // Turns out insert and a rowCount() check is not always valid. Better to use a lastInsertId check
     }
-        public function updateAnything(int $id, array $data): bool
+    protected function updateAnything(array $data, string $uniqueField, int $responseId, string $dbName, string $dbType = "db"): bool
     {
         $dataSet = implode(", ", array_map(fn($key) => "$key = :$key", array_keys($data)));
-        $stmt = $this->db->prepare("UPDATE \`DB_NAME\` SET $dataSet WHERE \`FIELD_ID_NAME\` = :id");
-        $stmt->execute(array_merge($data, ["id" => $id]));
-        if ($stmt->rowCount() === 0) return false;
-        return true;
+        $stmt = $this->$dbType->prepare("UPDATE $dbName SET $dataSet WHERE \`$uniqueField\` = :id");
+        $stmt->execute(array_merge($data, ["id" => $responseId]));
+        return $stmt->rowCount() > 0; // rather than if($stmt->rowCount() === 0) return false; return true; This does it in one line
     }
+}
 }`;
                     fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
                 } catch (error) {
