@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 });
 
 const completed = (msg) => {
-    console.log(msg);
+    console.error(msg);
     rl.question('The process seems to have completed successfully - press Enter to close', () => {
         rl.close();
     });
@@ -18,8 +18,8 @@ const completed = (msg) => {
 
 rl.question("Enter the project name : ", function (projName) {
     rl.question("Enter the database name (DB_NAME): ", function (dbName) {
-        rl.question("MariaDb or Mysql : (default: 3307 (Maria)) ", function (dbPortal) {
-            const dbPort = dbPortal || 3307;
+        rl.question("MariaDb or Mysql : (default: 3306 (MySql)) ", function (dbPortal) {
+            const dbPort = dbPortal || 3306;
             rl.question("Enter Git Repository URL to automatically create remote address (default: no) ", function (git) {
                 const gitRep = git || false;
 
@@ -44,7 +44,7 @@ rl.question("Enter the project name : ", function (projName) {
                     fs.mkdirSync(`${projName}/view/public`);
 
                 } catch (error) {
-                    console.log(`Error occurred: ${error.message}`);
+                    console.error(`Error occurred: ${error.message}`);
                 }
 
                 function createReadmeInFolders(folders) {
@@ -55,7 +55,7 @@ rl.question("Enter the project name : ", function (projName) {
                                 const readmeContent = `# Placeholder for ${folderName}`;
 
                                 fs.writeFileSync(path.join(folder, 'README.md'), readmeContent);
-                                console.log(`Created README.md in ${folder}`);
+                                console.error(`Created README.md in ${folder}`);
                             }
                         } catch (error) {
                             console.error(`Error processing folder ${folder}: ${error.message}`);
@@ -232,6 +232,7 @@ try {
 
 require_once PROJECT_DIRECTORY . '/Controllers/RouteController.php';
 $db = null;`
+                    fs.writeFileSync(`${projName}/public/index.php`, index);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -276,11 +277,11 @@ namespace Controllers\\Abstract;
 
 use Factory\\ManagerFactory;
 use Twig\\Environment;
-use model\\Trait\\TraitLaundryRoom, model\\Trait\\TraitStringTest, model\\Trait\\TraitIntTest;
+use model\\Trait\\TraitLaundryRoom;
 
 abstract class AbstractController
 {
-    use TraitLaundryRoom, TraitStringTest, TraitIntTest;
+    use TraitLaundryRoom;
 
     protected Environment $twig;
     protected ManagerFactory $managerFactory;
@@ -478,7 +479,7 @@ use model\\MyPDO;
 
 class ConnectionFactory
 {
-    public static function createMainDb(): MyPDO
+    public static function createDb(): MyPDO
     {
         return MyPDO::getInstance(
             DB_CONNECTION_STRING,
@@ -547,10 +548,9 @@ abstract class AbstractManager
     protected MyPDO $db;
     protected Environment $twig;
 
-    public function __construct(MyPDO $db, Environment $twig)
+    public function __construct(MyPDO $db)
     {
         $this->db = $db;
-        $this->twig = $twig;
     }
         public function insertAnything(array $data): bool
     {
@@ -610,9 +610,10 @@ abstract class AbstractMapping
                 }
 
                 try {
-                    const connManager = `<<?php
+                    const connManager = `<?php
 
 namespace model\\Manager;
+use model\\Abstract\\AbstractManager;
 class ConnectionManager extends AbstractManager
 {
     public function logoutUser() : void
@@ -651,11 +652,11 @@ class RouteManager
 
     private ManagerFactory $factory;
 
-    public function __construct(Environment $twig, MyPDO $mainDb, MyPDO $candDb, MyPDO $testDb)
+    public function __construct(Environment $twig, MyPDO $db)
     {
         $this->twig = $twig;
 
-        $this->factory = new ManagerFactory($mainDb, $candDb, $testDb);
+        $this->factory = new ManagerFactory($db);
     }
 
     public function registerRoute(string $routeName, string $controllerClass, string $methodName): void
@@ -701,6 +702,7 @@ DB_NAME = "isp_main",
 DB_PORT = 3306,
 DB_CHARSET = "utf8mb4",
 DB_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+const DB_CONNECTION_STRING = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
 
 const PROJECT_DIRECTORY = __DIR__,
 PUB_DIR = '../public/';
@@ -710,6 +712,169 @@ const ENV_MODE = "DEV";`
 }catch (error) {
                     console.error(`Error occurred: ${error.message}`);
 }
+                try {
+                    const trait = `<?php
+namespace model\\Trait;
+
+use DateTime;
+use Exception;
+
+Trait TraitLaundryRoom {
+   protected function standardClean($cleanThis): string
+    {
+        return htmlspecialchars(strip_tags(trim($cleanThis)), ENT_QUOTES);
+    }
+   protected function simpleTrim($trimThis): string
+    {
+        return trim($trimThis);
+    }
+   protected function urlClean($cleanThisUrl): string
+    {
+        return filter_var($cleanThisUrl, FILTER_SANITIZE_URL);
+    }
+   protected function intClean($cleanThisInt): int
+    {
+        $cleanedInt = filter_var($cleanThisInt, FILTER_SANITIZE_NUMBER_INT,
+            FILTER_FLAG_ALLOW_FRACTION
+        );
+        $cleanedInt = intval($cleanedInt);
+        return $cleanedInt;
+    }
+   protected function floatClean($cleanThisFloat): float
+    {
+        $cleanedFloat = filter_var($cleanThisFloat, FILTER_SANITIZE_NUMBER_FLOAT,
+            FILTER_FLAG_ALLOW_FRACTION,
+        );
+        $cleanedFloat = floatval($cleanedFloat);
+        return $cleanedFloat;
+    }
+   protected function emailClean($cleanThisEmail): string
+    {
+        return filter_var($cleanThisEmail, FILTER_SANITIZE_EMAIL);
+    }
+    protected function dateClean(string|DateTime $dateInput): string
+    {
+        try {
+            if ($dateInput instanceof DateTime) {
+                // if it's already DateTime, it can only have come from the server side, so ok
+                $date = $dateInput;
+            } else {
+                // if it's a string, sanitise it and create a DateTime from it
+                $cleaned = trim($dateInput);
+                $cleaned = preg_replace('/[^0-9\\-:\\/\\sTZ]/', '', $cleaned);
+                $date = new DateTime($cleaned);
+            }
+
+            return $date->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            // If all that fails, send back the current time
+            return (new DateTime())->format('Y-m-d H:i:s');
+        }
+    }
+   protected function findTheNeedles($hay): bool
+    {
+        $needles = ["<script>",
+            "<iframe>",
+            "<object>",
+            "<embed>",
+            "<form>",
+            "<input>",
+            "<textarea>",
+            "<select>",
+            "<button>",
+            "<link>",
+            "<meta>",
+            "<style>",
+            "<svg>",
+            "<base>",
+            "<applet>",
+            "script",
+            "'click'",
+            '"click"',
+            "onclick",
+            "onload",
+            'onerror',
+            'src'];
+        foreach ($needles as $needle) {
+            if (str_contains($hay, $needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}`
+                    fs.writeFileSync(`${projName}/model/Trait/TraitLaundryRoom.php`, trait);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+                try{
+const connCont = `<?php
+
+namespace Controllers;
+
+
+use Factory\\ManagerFactory;
+use model\\Manager\\ConnectionManager;
+use Twig\\Environment;
+
+
+class ConnectionController extends Abstract\\AbstractController
+{
+    private ConnectionManager $connectionManager;
+
+    public function __construct(Environment $twig, ManagerFactory $managerFactory)
+    {
+        /*
+         * Instantiates Managers needed for this Controller
+         * Avoids instantiation of unneeded Managers
+         */
+        parent::__construct($twig, $managerFactory);
+        $this->connectionManager = $this->getManager(ConnectionManager::class);
+    }
+    public function logout()
+    {
+        $this->connectionManager->logoutUser();
+        header("Location: ./");
+        exit;
+    }
+
+    public function index() : void
+    {
+        echo $this->twig->render('public/public.index.html.twig');
+    }
+}`
+                    fs.writeFileSync(`${projName}/Controllers/ConnectionController.php`, connCont);
+                }catch(error){
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+                try {
+                    process.chdir(`${projName}`);
+                    let composerAvailable = false;
+                    try {
+                        execSync('composer --version', { stdio: 'ignore' });
+                        composerAvailable = true;
+                    } catch {
+                        console.error('Composer not found. Skipping Twig installation.');
+                    }
+
+                    if (composerAvailable) {
+                        execSync(`composer require "twig/twig:^3.0"`, { stdio: 'inherit' });
+                    }
+                    execSync(`git init`, {stdio: 'inherit'});
+                    execSync(`git branch -m main`, {stdio: 'inherit'});
+                    execSync(`git add .`, {stdio: 'inherit'});
+                    execSync(`git commit -m "Setup completed by Leerlandais"`, {stdio: 'inherit'});
+                    if (gitRep) {
+                        execSync(`git remote add origin ${gitRep}`, {stdio: "inherit"});
+                        execSync('git push -u origin main', {stdio: "inherit"});
+                    }
+                } catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
+
                 completed(" - All done!");
 
             });
