@@ -863,7 +863,7 @@ console.error(`Created ConnectionController.php`);
                     console.error(`Error occurred: ${error.message}`);
                 }
                 try {
-                    execSync('npm install tailwindcss@3.4.17 postcss@8.4.49 autoprefixer@10.4.20 @fullhuman/postcss-purgecss');
+
                     const tailConf = `/** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ['./view/**/*.twig', './public/scripts/*.js'],
@@ -918,6 +918,7 @@ module.exports = {
                 }
 
                     process.chdir(`${projName}`);
+                execSync('npm install tailwindcss@3.4.17 postcss@8.4.49 autoprefixer@10.4.20 @fullhuman/postcss-purgecss');
                     let composerAvailable = false;
                     try {
                         execSync('composer --version', { stdio: 'ignore' });
