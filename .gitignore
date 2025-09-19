@@ -1,1 +1,6 @@
 *.exe
+.idea
+/vendor
+/node_modules
+config.php
+public/images
