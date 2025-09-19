@@ -80,12 +80,14 @@ rl.question("Enter the project name : ", function (projName) {
                     `${projName}/view/private`,
                     `${projName}/view/public`
                 ]);
+                console.error(`Created README.md in all folders`);
                 try {
                     const extIndex = `<?php
     header("Location: public");
     die();
             `;
                     fs.writeFileSync(`${projName}/index.php`, extIndex);
+                    console.error(`Created index.php`);
                 } catch (error) {
                     console.error(error);
                 }
@@ -96,6 +98,7 @@ rl.question("Enter the project name : ", function (projName) {
 config.php
 `;
                     fs.writeFileSync(`${projName}/.gitignore`, gitIgnore);
+                    console.error(`Created .gitignore`);
                 } catch (error) {
                     console.error(error);
                 }
@@ -112,7 +115,7 @@ config.php
         {% block stylesheet %}{% endblock %}
     {% endblock %}
 </head>
-<body class={% block bodyClass %}{% endblock %}>{% block body %}
+<body class="{% block bodyClass %}{% endblock %}">{% block body %}
 {% block systemMessage %}{% endblock %}
 {% block dumpArea %}{% endblock %}
 {% block navBar %}
@@ -139,15 +142,19 @@ config.php
 </body> {% endblock %}
 </html>`;
                     fs.writeFileSync(`${projName}/view/base.html.twig`, baseTwig);
-
+                    console.error(`Created base.html.twig`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
 
                 try {
-                    const tempTwig = `{% extends 'base.html.twig' %}`;
+                    const tempTwig = `{% extends 'base.html.twig' %}
+{% block stylesheet %}
+    <\link href="../dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+{% block bodyClass %}h-screen bg-amber-50{% endblock %}`;
                     fs.writeFileSync(`${projName}/view/template.html.twig`, tempTwig);
-
+                    console.error(`Created template.html.twig`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -157,6 +164,7 @@ config.php
 {% block hero %}If you can see this, all is good{% endblock %}
         `;
                     fs.writeFileSync(`${projName}/view/public/public.index.html.twig`, homeTwig);
+                    console.error(`Created public.index.html.twig`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -176,6 +184,7 @@ const IMG_DIR = '/public/images';
 `;
 
                     fs.writeFileSync(`${projName}/config.php`, cfgFile);
+                    console.error(`Created config.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -233,6 +242,7 @@ try {
 require_once PROJECT_DIRECTORY . '/Controllers/RouteController.php';
 $db = null;`
                     fs.writeFileSync(`${projName}/public/index.php`, index);
+                    console.error(`Created index.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -266,6 +276,7 @@ class MyPDO extends PDO
 }
 `
                     fs.writeFileSync(`${projName}/model/MyPDO.php`, pdo);
+                    console.error(`Created MyPDO.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -440,6 +451,7 @@ abstract class AbstractController
 `
 
                     fs.writeFileSync(`${projName}/Controllers/Abstract/AbstractController.php`, absController);
+                    console.error(`Created AbstractController.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -466,6 +478,7 @@ $route = $_GET['route'] ?? 'home';
 $router->handleRequest($route);`
 
                     fs.writeFileSync(`${projName}/Controllers/RouteController.php`, routeController);
+                    console.error(`Created RouteController.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -491,6 +504,7 @@ class ConnectionFactory
 
 }`
                     fs.writeFileSync(`${projName}/factory/ConnectionFactory.php`, connFactory);
+                    console.error(`Created ConnectionFactory.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -531,6 +545,7 @@ class ManagerFactory
     }
 }`
                     fs.writeFileSync(`${projName}/factory/ManagerFactory.php`, managerFactory);
+                    console.error(`Created ManagerFactory.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -569,6 +584,7 @@ abstract class AbstractManager
     }
 }`;
                     fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
+                    console.error(`Created AbstractManager.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -596,15 +612,11 @@ abstract class AbstractMapping
     }
 }`
                     fs.writeFileSync(`${projName}/model/Abstract/AbstractMapping.php`, absMapping);
+                    console.error(`Created AbstractMapping.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
 
-                try {
-
-                } catch (error) {
-                    console.error(`Error occurred: ${error.message}`);
-                }
 
                 try {
                     const connManager = `<?php
@@ -629,6 +641,7 @@ class ConnectionManager extends AbstractManager
     
 }`
                     fs.writeFileSync(`${projName}/model/Manager/ConnectionManager.php`, connManager);
+                    console.error(`Created ConnectionManager.php`);
                 }catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -684,6 +697,7 @@ class RouteManager
     }
 }`
     fs.writeFileSync(`${projName}/model/Manager/RouteManager.php`, routeManager);
+                    console.error(`Created RouteManager.php`);
 }catch (error) {
                     console.error(`Error occurred: ${error.message}`);
 }
@@ -706,6 +720,7 @@ PUB_DIR = '../public/';
 
 const ENV_MODE = "DEV";`
     fs.writeFileSync(`${projName}/config.php`, config);
+                    console.error(`Created config.php`);
 }catch (error) {
                     console.error(`Error occurred: ${error.message}`);
 }
@@ -801,6 +816,7 @@ Trait TraitLaundryRoom {
     }
 }`
                     fs.writeFileSync(`${projName}/model/Trait/TraitLaundryRoom.php`, trait);
+                    console.error(`Created TraitLaundryRoom.php`);
                 }catch (error) {
                     console.error(`Error occurred: ${error.message}`);
                 }
@@ -842,11 +858,65 @@ class ConnectionController extends Abstract\\AbstractController
     }
 }`
                     fs.writeFileSync(`${projName}/Controllers/ConnectionController.php`, connCont);
+console.error(`Created ConnectionController.php`);
                 }catch(error){
                     console.error(`Error occurred: ${error.message}`);
                 }
-
                 try {
+                    execSync('npm install tailwindcss@3.4.17 postcss@8.4.49 autoprefixer@10.4.20 @fullhuman/postcss-purgecss');
+                    const tailConf = `/** @type {import('tailwindcss').Config} */
+module.exports = {
+    content: ['./view/**/*.twig', './public/scripts/*.js'],
+    theme: {
+        extend: {},
+    },
+    plugins: [],
+}`;
+                    fs.writeFileSync(`${projName}/tailwind.config.js`, tailConf);
+                    console.error(`Created tailwind.config.js`);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+                try {
+                    const postCss = `module.exports = {
+    plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+    }
+};`;
+                    fs.writeFileSync(`${projName}/postcss.config.js`, postCss);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+                try {
+                    const TailwindCss = `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Personalised TW Classes go here */`
+                    fs.writeFileSync(`${projName}/public/styles/tailwind.css`, TailwindCss);
+                    console.error(`Created tailwind.css`);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+                try {
+
+                    const packJson = `{
+  "dependencies": {
+    "@fullhuman/postcss-purgecss": "^7.0.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17"
+  },
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./public/styles/tailwind.css -o ./dist/tailwind.min.css --minify"
+  }
+}`;
+                    fs.writeFileSync(`${projName}/package.json`, packJson);
+                    console.error(`Created package.json`);
+                }catch (error) {
+                    console.error(`Error occurred: ${error.message}`);
+                }
+
                     process.chdir(`${projName}`);
                     let composerAvailable = false;
                     try {
@@ -856,8 +926,12 @@ class ConnectionController extends Abstract\\AbstractController
                         console.error('Composer not found. Skipping Twig installation.');
                     }
 
+
+
                     if (composerAvailable) {
                         execSync(`composer require "twig/twig:^3.0"`, { stdio: 'inherit' });
+                        execSync(`npm run build:css`, { stdio: 'inherit' });
+                        console.error(`Added Twig to composer.json`);
                     }
                     execSync(`git init`, {stdio: 'inherit'});
                     execSync(`git branch -m main`, {stdio: 'inherit'});
@@ -867,9 +941,6 @@ class ConnectionController extends Abstract\\AbstractController
                         execSync(`git remote add origin ${gitRep}`, {stdio: "inherit"});
                         execSync('git push -u origin main', {stdio: "inherit"});
                     }
-                } catch (error) {
-                    console.error(`Error occurred: ${error.message}`);
-                }
 
 
                 completed(" - All done!");
