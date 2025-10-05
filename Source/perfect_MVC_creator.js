@@ -586,6 +586,23 @@ abstract class AbstractManager
         $stmt->execute(array_merge($data, ["id" => $responseId]));
         return $stmt->rowCount() > 0; // rather than if($stmt->rowCount() === 0) return false; return true; This does it in one line
     }
+        protected function selectAnything(array $data, string $dbName, string $dbType = "db"): array|false
+    {
+
+        $conditions = [];
+        foreach ($data as $key => $value) {
+            $conditions[] = "$key = :$key";
+        }
+        $whereClause = implode(" OR ", $conditions);
+
+        $sql = "SELECT * FROM $dbName WHERE $whereClause";
+        $stmt = $this->$dbType->prepare($sql);
+        $stmt->execute($data);
+
+        $results = $stmt->fetchAll();
+
+        return $results ?: false;
+    }
 }`;
                     fs.writeFileSync(`${projName}/model/Abstract/AbstractManager.php`, absMan);
                     console.error(`Created AbstractManager.php`);
