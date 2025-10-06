@@ -591,7 +591,11 @@ abstract class AbstractManager
 
         $conditions = [];
         foreach ($data as $key => $value) {
-            $conditions[] = "$key = :$key";
+            if(!empty($value)) {
+                $conditions[] = "$key = :$key";
+            }else {
+                unset($data[$key]);
+            }
         }
         $whereClause = implode(" OR ", $conditions);
 
