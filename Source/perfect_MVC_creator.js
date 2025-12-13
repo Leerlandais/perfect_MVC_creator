@@ -34,7 +34,7 @@ rl.question("Enter the project name : ", function (projName) {
                     fs.mkdirSync(`${projName}/model/Manager`);
                     fs.mkdirSync(`${projName}/model/Mapping`);
                     fs.mkdirSync(`${projName}/model/Trait`);
-                    fs.mkdirSync(`${projName}/factory`);
+                    fs.mkdirSync(`${projName}/Factory`);
                     fs.mkdirSync(`${projName}/public`);
                     fs.mkdirSync(`${projName}/view`);
                     fs.mkdirSync(`${projName}/public/images`);
@@ -71,7 +71,7 @@ rl.question("Enter the project name : ", function (projName) {
                     `${projName}/model/Manager`,
                     `${projName}/model/Mapping`,
                     `${projName}/model/Trait`,
-                    `${projName}/factory`,
+                    `${projName}/Factory`,
                     `${projName}/public`,
                     `${projName}/public/images`,
                     `${projName}/public/scripts`,
@@ -185,6 +185,9 @@ const DB_CHARSET = "utf8mb4";
 const PROJECT_DIRECTORY = __DIR__;
 const PUB_DIR = '/public/';
 const IMG_DIR = '/public/images';
+const ENV_MODE = "DEV";
+const DB_CONNECTION_STRING = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
+const DB_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
 `;
 
                     fs.writeFileSync(`${projName}/config.php`, cfgFile);
@@ -213,7 +216,7 @@ $sessionRole = "";
 if(isset($_SESSION['roles'])) $sessionRole = $_SESSION['roles'];
 use Twig\\Loader\\FilesystemLoader;
 use Twig\\Environment;
-use factory\\ConnectionFactory;
+use Factory\\ConnectionFactory;
 require_once "../config.php";
 spl_autoload_register(function ($class) {
   $class = str_replace('\\\\', '/', $class);
@@ -490,7 +493,7 @@ $router->handleRequest($route);`
                 try {
                     const connFactory = `<?php
 
-namespace factory;
+namespace Factory;
 
 use model\\MyPDO;
 
@@ -507,7 +510,7 @@ class ConnectionFactory
     }
 
 }`
-                    fs.writeFileSync(`${projName}/factory/ConnectionFactory.php`, connFactory);
+                    fs.writeFileSync(`${projName}/Factory/ConnectionFactory.php`, connFactory);
                     console.error(`Created ConnectionFactory.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
@@ -548,7 +551,7 @@ class ManagerFactory
         return $this->instances[$managerClass];
     }
 }`
-                    fs.writeFileSync(`${projName}/factory/ManagerFactory.php`, managerFactory);
+                    fs.writeFileSync(`${projName}/Factory/ManagerFactory.php`, managerFactory);
                     console.error(`Created ManagerFactory.php`);
                 } catch (error) {
                     console.error(`Error occurred: ${error.message}`);
@@ -727,28 +730,7 @@ class RouteManager
                     console.error(`Error occurred: ${error.message}`);
 }
 
-try {
-                    const config = `<?php
 
-const DB_DRIVER = "mysql",
-DB_HOST = "localhost",
-DB_LOGIN = "root",
-DB_PWD = "",
-DB_NAME = "isp_main",
-DB_PORT = 3306,
-DB_CHARSET = "utf8mb4",
-DB_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
-const DB_CONNECTION_STRING = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
-
-const PROJECT_DIRECTORY = __DIR__,
-PUB_DIR = '../public/';
-
-const ENV_MODE = "DEV";`
-    fs.writeFileSync(`${projName}/config.php`, config);
-                    console.error(`Created config.php`);
-}catch (error) {
-                    console.error(`Error occurred: ${error.message}`);
-}
                 try {
                     const trait = `<?php
 namespace model\\Trait;
