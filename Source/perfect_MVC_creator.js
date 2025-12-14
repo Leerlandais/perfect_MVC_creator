@@ -574,12 +574,13 @@ abstract class AbstractManager
     {
         $this->db = $db;
     }
-    protected function insertAnything(array $data, string $dbName, string $dbType = "db"): bool
+    protected function insertAnything(array $data, string $dbName, string $dbType = "db", $returnId = false): bool|int
     {
         $columns = implode(", ", array_keys($data));
         $placeholders = ":" . implode(", :", array_keys($data));
         $stmt = $this->$dbType->prepare("INSERT INTO $dbName ($columns) VALUES ($placeholders)");
         $stmt->execute($data);
+        if($returnId === true) return $this->$dbType->lastInsertId();
         return (int)$this->$dbType->lastInsertId() > 0; // Turns out insert and a rowCount() check is not always valid. Better to use a lastInsertId check
     }
     protected function updateAnything(array $data, string $uniqueField, int $responseId, string $dbName, string $dbType = "db"): bool
