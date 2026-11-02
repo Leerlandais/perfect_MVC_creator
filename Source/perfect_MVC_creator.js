@@ -187,6 +187,7 @@ const PUB_DIR = '/public/';
 const IMG_DIR = '/public/images';
 const ENV_MODE = "DEV";
 const DB_CONNECTION_STRING = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
+const DB_UNKNOWN_CONNECTION_STRING = DB_DRIVER . ":host=" . DB_HOST . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
 const DB_OPTIONS = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
 `;
 
@@ -242,9 +243,12 @@ $twig->addGlobal("ENV", ENV_MODE);
  var_dump($_SESSION);
 try {
     $db = ConnectionFactory::createDb();
-} catch (Exception $e) {
-    die($e->getMessage());
+} catch (PDOException $e) {
+    ConnectionFactory::insertNewDb();
+
+    $db = ConnectionFactory::createDb();
 }
+
 
 require_once PROJECT_DIRECTORY . '/Controllers/RouteController.php';
 $db = null;`
@@ -271,13 +275,11 @@ class MyPDO extends PDO
     public static function getInstance($dsn, $username = null, $password = null, $options = null): MyPDO
     {
         $key = md5($dsn . $username);
+
         if (!isset(self::$instances[$key])) {
-            try {
-                self::$instances[$key] = new MyPDO($dsn, $username, $password, $options);
-            } catch (Exception $e) {
-                die("Connection Error : " . $e->getMessage());
-            }
+            self::$instances[$key] = new MyPDO($dsn, $username, $password, $options);
         }
+
         return self::$instances[$key];
     }
 }
@@ -507,6 +509,26 @@ class ConnectionFactory
             DB_PWD,
             DB_OPTIONS
         );
+    }
+
+    /**
+     * @throws \\Exception
+     */
+    public static function insertNewDb(): void
+    {
+        $pdo = MyPDO::getInstance(
+            DB_UNKNOWN_CONNECTION_STRING,
+            DB_LOGIN,
+            DB_PWD
+        );
+
+        $stmt = $pdo->prepare(
+            "CREATE DATABASE IF NOT EXISTS \`" . DB_NAME . "\`
+            CHARACTER SET utf8mb4
+            COLLATE utf8mb4_general_ci"
+        );
+
+        $stmt->execute();
     }
 
 }`
